@@ -28,7 +28,7 @@ function renderProducts() {
   products.forEach((product) => {
     const li = document.createElement("li");
     li.textContent = `${product.name} - $${product.price}`;
-    
+
     const addButton = document.createElement("button");
     addButton.textContent = "Add to Cart";
     addButton.onclick = () => addToCart(product);
@@ -50,15 +50,22 @@ function renderCart() {
 
   cart.forEach((item) => {
     const li = document.createElement("li");
-    li.textContent = `${item.name} - $${item.price}`;
+    li.textContent = `${item.name} - $${item.price} (x${item.quantity})`;
     cartList.appendChild(li);
   });
 }
 
-// Add a product to the cart and update the display
+// Add a product to the cart (checks for duplicates)
 function addToCart(product) {
   const cart = getCart();
-  cart.push(product);
+  const existingProduct = cart.find((item) => item.id === product.id);
+
+  if (existingProduct) {
+    existingProduct.quantity += 1; // Increment quantity if already in cart
+  } else {
+    cart.push({ ...product, quantity: 1 }); // Add new product with quantity 1
+  }
+
   saveCart(cart);
   renderCart();
 }
