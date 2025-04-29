@@ -1,4 +1,3 @@
-// Sample product data
 const products = [
   { id: 1, name: "Product 1", price: 10 },
   { id: 2, name: "Product 2", price: 20 },
@@ -7,75 +6,55 @@ const products = [
   { id: 5, name: "Product 5", price: 50 },
 ];
 
-// Select DOM elements
 const productList = document.getElementById("product-list");
 const cartList = document.getElementById("cart-list");
 const clearCartBtn = document.getElementById("clear-cart-btn");
 
-// Helper function to get cart from session storage
-function getCart() {
-  const cart = sessionStorage.getItem("cart");
-  return cart ? JSON.parse(cart) : [];
-}
+// Load cart from sessionStorage
+let cart = JSON.parse(sessionStorage.getItem("cart")) || [];
 
-// Helper function to save cart to session storage
-function saveCart(cart) {
-  sessionStorage.setItem("cart", JSON.stringify(cart));
-}
-
-// Render the list of products with "Add to Cart" buttons
+// Display products
 function renderProducts() {
-  products.forEach((product) => {
+  products.forEach(product => {
     const li = document.createElement("li");
     li.textContent = `${product.name} - $${product.price}`;
+    
+    const addBtn = document.createElement("button");
+    addBtn.textContent = "Add to Cart";
+    addBtn.addEventListener("click", () => addToCart(product));
 
-    const addButton = document.createElement("button");
-    addButton.textContent = "Add to Cart";
-    addButton.onclick = () => addToCart(product);
-
-    li.appendChild(addButton);
+    li.appendChild(addBtn);
     productList.appendChild(li);
   });
 }
 
-// Render the shopping cart based on session storage data
+// Display cart items
 function renderCart() {
-  cartList.innerHTML = ""; // Clear previous cart items
-  const cart = getCart();
-
-  if (cart.length === 0) {
-    cartList.innerHTML = "<li>Cart is empty.</li>";
-    return;
-  }
-
-  cart.forEach((item) => {
+  cartList.innerHTML = ""; // Clear existing list
+  cart.forEach(item => {
     const li = document.createElement("li");
-    li.textContent = `${item.name} - $${item.price} (x${item.quantity})`;
+    li.textContent = `${item.name} - $${item.price}`;
     cartList.appendChild(li);
   });
 }
 
-// Add a product to the cart (checks for duplicates)
+// Add to cart
 function addToCart(product) {
-  const cart = getCart();
-  const existingProduct = cart.find((item) => item.id === product.id);
-
-  if (existingProduct) {
-    existingProduct.quantity += 1; // Increment quantity if already in cart
-  } else {
-    cart.push({ ...product, quantity: 1 }); // Add new product with quantity 1
-  }
-
-  saveCart(cart);
+  cart.push(product);
+  sessionStorage.setItem("cart", JSON.stringify(cart));
   renderCart();
 }
 
-// Clear the cart from session storage and update the display
-clearCartBtn.addEventListener("click", () => {
+// Clear cart
+function clearCart() {
+  cart = [];
   sessionStorage.removeItem("cart");
   renderCart();
-});
+}
 
-// Initialize the product list and cart on page load
+// Attach event to Clear Cart button
+clearCartBtn.addEventListener("click", clearCart);
+
+// Initial rendering
 renderProducts();
 renderCart();
